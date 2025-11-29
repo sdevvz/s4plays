@@ -1,0 +1,56 @@
+<section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-white">
+    {{# Background Decorations #}}
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-orange-100 blur-3xl opacity-50"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-orange-50 blur-3xl opacity-50"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center max-w-3xl mx-auto">
+            {{# Update Badge #}}
+            {{ if hero_badge }}
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-sm font-semibold mb-6">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                {{ hero_badge }}
+            </div>
+            {{ /if }}
+            
+            {{# Main Headline #}}
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+                {{ hero_title_part1 ?? 'Unlock Premium' }} 
+                <span class="text-orange-500 relative">
+                    {{ hero_title_highlight ?? 'Potential' }}
+                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" />
+                    </svg>
+                </span>
+                {{ hero_title_part2 ?? 'For Free' }}
+            </h1>
+            
+            {{# Description #}}
+            <p class="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed">
+                {{ hero_description ?? 'Access a curated library of modded apps, freemium games, and productivity tools. No jailbreak required. Secure, fast, and constantly updated.' }}
+            </p>
+            
+            {{# CTA Buttons #}}
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{{ hero_primary_cta_url ?? '#library' }}" class="btn-pulse bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition transform hover:-translate-y-1 shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> 
+                    {{ hero_primary_cta_text ?? 'Browse Library' }}
+                </a>
+                <a href="{{ hero_secondary_cta_url ?? '#how-it-works' }}" class="bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-bold text-lg hover:border-orange-500 hover:text-orange-500 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-play"></i> 
+                    {{ hero_secondary_cta_text ?? 'How it Works' }}
+                </a>
+            </div>
+
+            {{# Trust Metrics #}}
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-gray-100 pt-8">
+                {{ stats }}
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ value }}</div>
+                        <div class="text-sm text-gray-500">{{ label }}</div>
+                    </div>
+                {{ /stats }}
+            </div>
+        </div>
+    </div>
+</section>

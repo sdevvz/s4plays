@@ -1,0 +1,89 @@
+title: Apps
+sections:
+  main:
+    display: Main
+    fields:
+      -
+        handle: title
+        field:
+          type: text
+          display: 'App Name'
+          required: true
+          validate:
+            - required
+      -
+        handle: category
+        field:
+          type: terms
+          taxonomies:
+            - categories
+          display: Category
+          mode: select
+          max_items: 1
+      -
+        handle: description
+        field:
+          type: textarea
+          display: Description
+          character_limit: 150
+      -
+        handle: app_icon
+        field:
+          type: assets
+          container: assets
+          max_files: 1
+          display: 'App Icon'
+      -
+        handle: icon_class
+        field:
+          type: text
+          display: 'Icon Class (FontAwesome)'
+          instructions: 'e.g., fa-solid fa-gamepad'
+          if:
+            app_icon: 'null'
+      -
+        handle: icon_color
+        field:
+          type: select
+          display: 'Icon Color'
+          options:
+            text-green-500: Green
+            text-yellow-500: Yellow
+            text-red-600: Red
+            text-blue-500: Blue
+            text-gray-800: Gray
+            text-orange-500: Orange
+          default: text-orange-500
+      -
+        handle: rating
+        field:
+          type: text
+          display: Rating
+          default: '4.5'
+          validate:
+            - numeric
+      -
+        handle: downloads
+        field:
+          type: text
+          display: Downloads
+          default: '1M+'
+      -
+        handle: badge
+        field:
+          type: text
+          display: Badge
+          default: FREE
+  seo:
+    display: SEO
+    fields:
+      -
+        handle: seo_description
+        field:
+          type: textarea
+          display: 'SEO Description'
+      -
+        handle: seo_keywords
+        field:
+          type: text
+          display: 'SEO Keywords'

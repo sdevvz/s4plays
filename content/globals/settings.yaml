@@ -1,0 +1,128 @@
+title: Settings
+sections:
+  hero:
+    display: 'Hero Section'
+    fields:
+      -
+        handle: hero_badge
+        field:
+          type: text
+          display: 'Update Badge'
+          default: 'v4.2 Update Live: New Tools Added'
+      -
+        handle: hero_title_part1
+        field:
+          type: text
+          display: 'Title Part 1'
+          default: 'Unlock Premium'
+      -
+        handle: hero_title_highlight
+        field:
+          type: text
+          display: 'Title Highlight'
+          default: 'Potential'
+      -
+        handle: hero_title_part2
+        field:
+          type: text
+          display: 'Title Part 2'
+          default: 'For Free'
+      -
+        handle: hero_description
+        field:
+          type: textarea
+          display: Description
+      -
+        handle: hero_primary_cta_text
+        field:
+          type: text
+          display: 'Primary CTA Text'
+          default: 'Browse Library'
+      -
+        handle: hero_primary_cta_url
+        field:
+          type: text
+          display: 'Primary CTA URL'
+          default: '#library'
+      -
+        handle: hero_secondary_cta_text
+        field:
+          type: text
+          display: 'Secondary CTA Text'
+          default: 'How it Works'
+      -
+        handle: hero_secondary_cta_url
+        field:
+          type: text
+          display: 'Secondary CTA URL'
+          default: '#how-it-works'
+      -
+        handle: stats
+        field:
+          type: replicator
+          display: 'Trust Stats'
+          sets:
+            stat:
+              display: Stat
+              fields:
+                -
+                  handle: value
+                  field:
+                    type: text
+                    display: Value
+                -
+                  handle: label
+                  field:
+                    type: text
+                    display: Label
+  features:
+    display: Features
+    fields:
+      -
+        handle: features
+        field:
+          type: replicator
+          display: Features
+          sets:
+            feature:
+              display: Feature
+              fields:
+                -
+                  handle: icon
+                  field:
+                    type: text
+                    display: 'Icon Class'
+                    instructions: 'e.g., fa-solid fa-shield-halved'
+                -
+                  handle: title
+                  field:
+                    type: text
+                    display: Title
+                -
+                  handle: description
+                  field:
+                    type: textarea
+                    display: Description
+  notifications:
+    display: 'Social Proof'
+    fields:
+      -
+        handle: notification_users
+        field:
+          type: list
+          display: 'User Names'
+          default:
+            - Alex99
+            - SarahK
+            - GamerX
+            - ProDev
+            - MikeT
+            - Anna_B
+  footer:
+    display: Footer
+    fields:
+      -
+        handle: footer_description
+        field:
+          type: textarea
+          display: 'Footer Description'

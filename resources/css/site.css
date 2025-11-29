@@ -1,0 +1,316 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source "../views";
+@source "../../content";
+
+/**
+ * AppVault - Main Stylesheet
+ * Tailwind CSS v4 Compatible
+ */
+
+/* ========================================
+   Tailwind CSS v4 Imports
+   ======================================== */
+   @import "tailwindcss";
+
+   /* ========================================
+      Google Fonts Import
+      ======================================== */
+   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+   
+   /* ========================================
+      Theme Configuration
+      ======================================== */
+   @theme {
+     /* Custom Colors */
+     --color-primary-50: #fff7ed;
+     --color-primary-100: #ffedd5;
+     --color-primary-200: #fed7aa;
+     --color-primary-300: #fdba74;
+     --color-primary-400: #fb923c;
+     --color-primary-500: #f97316;
+     --color-primary-600: #ea580c;
+     --color-primary-700: #c2410c;
+     --color-primary-800: #9a3412;
+     --color-primary-900: #7c2d12;
+   
+     /* Font Family */
+     --font-family-sans: 'Inter', system-ui, sans-serif;
+   
+     /* Custom Animations */
+     --animate-pulse-orange: pulse-orange 2s infinite;
+     --animate-progress-load: progressLoad 3s ease-in-out forwards;
+   }
+   
+   /* ========================================
+      Base Styles
+      ======================================== */
+   @layer base {
+     body {
+       font-family: var(--font-family-sans);
+       scroll-behavior: smooth;
+     }
+   
+     /* Selection Colors */
+     ::selection {
+       background-color: rgb(255 237 213); /* orange-100 */
+       color: rgb(234 88 12); /* orange-600 */
+     }
+   }
+   
+   /* ========================================
+      Component Styles
+      ======================================== */
+   @layer components {
+     
+     /* Glass Card Effect */
+     .glass-card {
+       background: rgba(255, 255, 255, 0.95);
+       backdrop-filter: blur(10px);
+       -webkit-backdrop-filter: blur(10px);
+       border: 1px solid rgba(249, 115, 22, 0.1);
+     }
+   
+     /* Pulsing Button Animation */
+     .btn-pulse {
+       animation: pulse-orange 2s infinite;
+     }
+   
+     /* Loading Spinner */
+     .loader {
+       border: 4px solid #f3f3f3;
+       border-top: 4px solid #f97316;
+       border-radius: 50%;
+       width: 40px;
+       height: 40px;
+       animation: spin 1s linear infinite;
+     }
+   
+     /* Progress Bar Animation */
+     .progress-animate {
+       animation: progressLoad 3s ease-in-out forwards;
+     }
+   
+     /* Input Search */
+     .input-search {
+       width: 100%;
+       padding-left: 2.5rem;
+       padding-right: 0.75rem;
+       padding-top: 1rem;
+       padding-bottom: 1rem;
+       border: 1px solid rgb(229 231 235);
+       border-radius: 0.75rem;
+       background-color: white;
+       transition: all 0.3s;
+     }
+   
+     .input-search::placeholder {
+       color: rgb(156 163 175);
+     }
+   
+     .input-search:focus {
+       outline: none;
+       border-color: rgb(249 115 22);
+       box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+     }
+   }
+   
+   /* ========================================
+      Utility Classes
+      ======================================== */
+   @layer utilities {
+     
+     /* Text Gradient */
+     .text-gradient {
+       background: linear-gradient(to right, #f97316, #ea580c);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       background-clip: text;
+     }
+   
+     /* Backdrop Blur */
+     .backdrop-blur-light {
+       backdrop-filter: blur(8px);
+       -webkit-backdrop-filter: blur(8px);
+     }
+   
+     .backdrop-blur-heavy {
+       backdrop-filter: blur(20px);
+       -webkit-backdrop-filter: blur(20px);
+     }
+   
+     /* Custom Scrollbar */
+     .scrollbar-thin::-webkit-scrollbar {
+       width: 6px;
+       height: 6px;
+     }
+   
+     .scrollbar-thin::-webkit-scrollbar-track {
+       background: rgb(243 244 246);
+       border-radius: 9999px;
+     }
+   
+     .scrollbar-thin::-webkit-scrollbar-thumb {
+       background: rgb(209 213 219);
+       border-radius: 9999px;
+     }
+   
+     .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+       background: rgb(156 163 175);
+     }
+   
+     /* Line Clamp */
+     .line-clamp-2 {
+       display: -webkit-box;
+       -webkit-line-clamp: 2;
+       -webkit-box-orient: vertical;
+       overflow: hidden;
+     }
+   
+     .line-clamp-3 {
+       display: -webkit-box;
+       -webkit-line-clamp: 3;
+       -webkit-box-orient: vertical;
+       overflow: hidden;
+     }
+   }
+   
+   /* ========================================
+      Keyframe Animations
+      ======================================== */
+   
+   /* Spinner */
+   @keyframes spin {
+     0% { 
+       transform: rotate(0deg); 
+     }
+     100% { 
+       transform: rotate(360deg); 
+     }
+   }
+   
+   /* Orange Pulse Effect */
+   @keyframes pulse-orange {
+     0% { 
+       box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); 
+     }
+     70% { 
+       box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); 
+     }
+     100% { 
+       box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); 
+     }
+   }
+   
+   /* Progress Bar Load */
+   @keyframes progressLoad {
+     0% { 
+       width: 0%; 
+     }
+     100% { 
+       width: 90%; 
+     }
+   }
+   
+   /* Fade In */
+   @keyframes fadeIn {
+     from {
+       opacity: 0;
+       transform: translateY(10px);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0);
+     }
+   }
+   
+   /* Slide Up */
+   @keyframes slideUp {
+     from {
+       opacity: 0;
+       transform: translateY(20px);
+     }
+     to {
+       opacity: 1;
+       transform: translateY(0);
+     }
+   }
+   
+   /* Scale In */
+   @keyframes scaleIn {
+     from {
+       opacity: 0;
+       transform: scale(0.9);
+     }
+     to {
+       opacity: 1;
+       transform: scale(1);
+     }
+   }
+   
+   /* ========================================
+      Responsive Utilities
+      ======================================== */
+   
+   /* Mobile Menu Transitions */
+   @media (max-width: 768px) {
+     .mobile-menu-enter {
+       max-height: 0;
+       opacity: 0;
+       overflow: hidden;
+       transition: all 0.3s ease-in-out;
+     }
+   
+     .mobile-menu-show {
+       max-height: 500px;
+       opacity: 1;
+     }
+   }
+   
+   /* ========================================
+      Accessibility Improvements
+      ======================================== */
+   
+   /* Focus Visible Styles */
+   :focus-visible {
+     outline: 2px solid rgb(249 115 22);
+     outline-offset: 2px;
+   }
+   
+   /* Reduced Motion */
+   @media (prefers-reduced-motion: reduce) {
+     *,
+     *::before,
+     *::after {
+       animation-duration: 0.01ms !important;
+       animation-iteration-count: 1 !important;
+       transition-duration: 0.01ms !important;
+       scroll-behavior: auto !important;
+     }
+   }
+   
+   /* High Contrast Mode */
+   @media (prefers-contrast: high) {
+     .glass-card {
+       background: white;
+       border: 2px solid black;
+     }
+   }
+   
+   /* ========================================
+      Print Styles
+      ======================================== */
+   @media print {
+     .no-print {
+       display: none !important;
+     }
+   
+     body {
+       background: white;
+     }
+   
+     .glass-card {
+       background: white;
+       border: 1px solid #e5e7eb;
+     }
+   }

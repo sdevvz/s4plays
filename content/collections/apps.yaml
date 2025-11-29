@@ -1,0 +1,10 @@
+title: Apps
+template: apps/show
+layout: layout
+revisions: false
+sort_dir: asc
+preview_targets:
+  -
+    label: Entry
+    url: '{permalink}'
+    refresh: true

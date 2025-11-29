@@ -1,0 +1,385 @@
+title: Page
+tabs:
+  main:
+    display: Main
+    sections:
+      -
+        fields:
+          -
+            handle: title
+            field:
+              type: text
+              required: true
+              validate:
+                - required
+              instructions: 'Page title (used in browser tab and SEO)'
+          -
+            handle: template
+            field:
+              type: template
+              display: Template
+              localizable: true
+              instructions: 'Select the template for this page'
+          -
+            handle: content
+            field:
+              type: markdown
+              display: Content
+              localizable: true
+              if:
+                template: 'not_equals:home'
+  
+  hero:
+    display: 'Hero Section'
+    sections:
+      -
+        display: 'Hero Content'
+        instructions: 'Configure the main hero section of your homepage'
+        fields:
+          -
+            handle: hero_badge
+            field:
+              type: text
+              display: 'Update Badge'
+              instructions: 'Small badge text above the headline'
+              placeholder: 'v4.2 Update Live: New Tools Added'
+              width: 100
+          -
+            handle: hero_title_part1
+            field:
+              type: text
+              display: 'Title - Part 1'
+              instructions: 'First part of the headline'
+              placeholder: 'Unlock Premium'
+              width: 33
+          -
+            handle: hero_title_highlight
+            field:
+              type: text
+              display: 'Title - Highlight'
+              instructions: 'Highlighted word (will be orange with underline)'
+              placeholder: 'Potential'
+              width: 33
+          -
+            handle: hero_title_part2
+            field:
+              type: text
+              display: 'Title - Part 2'
+              instructions: 'Last part of the headline'
+              placeholder: 'For Free'
+              width: 33
+          -
+            handle: hero_description
+            field:
+              type: textarea
+              display: Description
+              instructions: 'Subheading text below the main headline'
+              placeholder: 'Access a curated library of modded apps, freemium games, and productivity tools.'
+              character_limit: 300
+          -
+            handle: hero_primary_cta_text
+            field:
+              type: text
+              display: 'Primary Button Text'
+              placeholder: 'Browse Library'
+              width: 50
+          -
+            handle: hero_primary_cta_url
+            field:
+              type: link
+              display: 'Primary Button URL'
+              placeholder: '#library'
+              width: 50
+          -
+            handle: hero_secondary_cta_text
+            field:
+              type: text
+              display: 'Secondary Button Text'
+              placeholder: 'How it Works'
+              width: 50
+          -
+            handle: hero_secondary_cta_url
+            field:
+              type: link
+              display: 'Secondary Button URL'
+              placeholder: '#how-it-works'
+              width: 50
+      -
+        display: 'Trust Metrics'
+        instructions: 'Statistics displayed below the hero section'
+        fields:
+          -
+            handle: stats
+            field:
+              type: replicator
+              display: 'Trust Stats'
+              max_items: 4
+              collapse: false
+              sets:
+                stat:
+                  display: Stat
+                  fields:
+                    -
+                      handle: value
+                      field:
+                        type: text
+                        display: Value
+                        instructions: 'e.g., 2M+, 99%, 4.9/5'
+                        width: 50
+                        validate:
+                          - required
+                    -
+                      handle: label
+                      field:
+                        type: text
+                        display: Label
+                        instructions: 'e.g., Downloads, Uptime, User Rating'
+                        width: 50
+                        validate:
+                          - required
+  
+  library:
+    display: 'App Library Section'
+    sections:
+      -
+        display: 'Section Configuration'
+        fields:
+          -
+            handle: library_section_title_part1
+            field:
+              type: text
+              display: 'Section Title - Part 1'
+              instructions: 'First part before the highlight'
+              placeholder: 'Trending'
+              width: 50
+          -
+            handle: library_section_title_highlight
+            field:
+              type: text
+              display: 'Section Title - Highlight (Orange)'
+              instructions: 'Highlighted part of the title'
+              placeholder: 'Apps & Games'
+              width: 50
+          -
+            handle: library_section_description
+            field:
+              type: textarea
+              display: 'Section Description'
+              instructions: 'Text below the section title'
+              placeholder: 'Our most popular downloads this week. Fully optimized for iOS and Android devices.'
+              character_limit: 200
+          -
+            handle: library_apps_limit
+            field:
+              type: integer
+              display: 'Number of Apps to Show'
+              instructions: 'How many apps to display on homepage'
+              default: 6
+              min: 3
+              max: 12
+              width: 50
+          -
+            handle: library_show_search
+            field:
+              type: toggle
+              display: 'Show Search Bar'
+              default: true
+              width: 50
+          -
+            handle: library_show_filters
+            field:
+              type: toggle
+              display: 'Show Category Filters'
+              default: true
+              width: 50
+          -
+            handle: library_view_all_text
+            field:
+              type: text
+              display: '"View All" Button Text'
+              placeholder: 'View All Apps'
+              width: 50
+          -
+            handle: library_view_all_url
+            field:
+              type: link
+              display: '"View All" Button URL'
+              placeholder: '/apps'
+              width: 50
+  
+  features:
+    display: 'Features Section'
+    sections:
+      -
+        display: 'Section Header'
+        fields:
+          -
+            handle: features_section_title_part1
+            field:
+              type: text
+              display: 'Section Title - Part 1'
+              placeholder: 'Why Choose'
+              width: 50
+          -
+            handle: features_section_title_highlight
+            field:
+              type: text
+              display: 'Section Title - Highlight (Orange)'
+              placeholder: 'AppVault?'
+              width: 50
+      -
+        display: 'Feature Items'
+        instructions: 'Add the key features you want to highlight'
+        fields:
+          -
+            handle: features
+            field:
+              type: replicator
+              display: Features
+              collapse: false
+              sets:
+                feature:
+                  display: Feature
+                  fields:
+                    -
+                      handle: icon
+                      field:
+                        type: text
+                        display: 'Icon Class'
+                        instructions: 'FontAwesome class (e.g., fa-solid fa-shield-halved)'
+                        placeholder: 'fa-solid fa-shield-halved'
+                        width: 33
+                    -
+                      handle: title
+                      field:
+                        type: text
+                        display: Title
+                        instructions: 'Feature title'
+                        placeholder: 'Safe & Secure'
+                        width: 33
+                        validate:
+                          - required
+                    -
+                      handle: description
+                      field:
+                        type: textarea
+                        display: Description
+                        instructions: 'Feature description'
+                        placeholder: 'Every file is scanned by 50+ antivirus engines.'
+                        rows: 2
+                        width: 100
+  
+  seo:
+    display: SEO
+    sections:
+      -
+        display: 'Meta Information'
+        fields:
+          -
+            handle: seo_title
+            field:
+              type: text
+              display: 'SEO Title'
+              instructions: 'Override the default page title for SEO (leave blank to use page title)'
+              character_limit: 60
+          -
+            handle: seo_description
+            field:
+              type: textarea
+              display: 'Meta Description'
+              instructions: 'Brief description for search engines (150-160 characters recommended)'
+              character_limit: 160
+          -
+            handle: seo_keywords
+            field:
+              type: taggable
+              display: 'SEO Keywords'
+              instructions: 'Add relevant keywords (optional, for internal use)'
+          -
+            handle: seo_image
+            field:
+              type: assets
+              container: assets
+              max_files: 1
+              display: 'Social Share Image'
+              instructions: 'Image shown when page is shared on social media (1200x630px recommended)'
+          -
+            handle: seo_noindex
+            field:
+              type: toggle
+              display: 'Hide from Search Engines'
+              instructions: 'Enable to prevent search engines from indexing this page'
+              default: false
+  
+  advanced:
+    display: Advanced
+    sections:
+      -
+        display: 'Page Settings'
+        fields:
+          -
+            handle: custom_css
+            field:
+              type: code
+              mode: css
+              display: 'Custom CSS'
+              instructions: 'Add custom CSS for this page only'
+          -
+            handle: custom_js
+            field:
+              type: code
+              mode: javascript
+              display: 'Custom JavaScript'
+              instructions: 'Add custom JavaScript for this page only'
+          -
+            handle: body_class
+            field:
+              type: text
+              display: 'Body Class'
+              instructions: 'Add custom CSS classes to the body tag'
+  
+  sidebar:
+    display: Settings
+    sections:
+      -
+        display: 'Page Configuration'
+        fields:
+          -
+            handle: slug
+            field:
+              type: slug
+              localizable: true
+              validate: 'max:200'
+              instructions: 'URL-friendly version of the page title'
+          -
+            handle: parent
+            field:
+              type: entries
+              collections:
+                - pages
+              max_items: 1
+              listable: false
+              localizable: true
+              instructions: 'Select a parent page to nest this page'
+          -
+            handle: author
+            field:
+              type: users
+              display: Author
+              default: current
+              localizable: true
+              max_items: 1
+          -
+            handle: published_at
+            field:
+              type: date
+              display: 'Published Date'
+              time_enabled: true
+              default: now
+          -
+            handle: updated_at
+            field:
+              type: date
+              display: 'Last Updated'
+              time_enabled: true
+              mode: single

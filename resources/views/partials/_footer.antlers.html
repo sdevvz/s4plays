@@ -1,0 +1,68 @@
+<footer class="bg-gray-900 text-white pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {{# Brand Column #}}
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <span class="font-bold text-xl">AppVault</span>
+                </div>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    {{ footer_description ?? 'The #1 destination for modded apps and freemium tools. Enhancing your mobile experience safely and securely.' }}
+                </p>
+            </div>
+            
+            {{# Quick Links #}}
+            <div>
+                <h4 class="font-bold text-lg mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    {{ nav:footer_quick }}
+                        <li>
+                            <a href="{{ url }}" class="hover:text-orange-500 transition">
+                                {{ title }}
+                            </a>
+                        </li>
+                    {{ /nav:footer_quick }}
+                </ul>
+            </div>
+
+            {{# Legal Links #}}
+            <div>
+                <h4 class="font-bold text-lg mb-4">Legal</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    {{ nav:footer_legal }}
+                        <li>
+                            <a href="{{ url }}" class="hover:text-orange-500 transition">
+                                {{ title }}
+                            </a>
+                        </li>
+                    {{ /nav:footer_legal }}
+                </ul>
+            </div>
+            
+            {{# Newsletter #}}
+            <div>
+                <h4 class="font-bold text-lg mb-4">Newsletter</h4>
+                <p class="text-gray-400 text-sm mb-4">Get notified about new mods.</p>
+                {{ form:create in="newsletter" }}
+                    <div class="flex">
+                        <input type="email" 
+                               name="email" 
+                               placeholder="Email address" 
+                               required
+                               class="bg-gray-800 border-none text-white text-sm rounded-l-lg w-full px-4 py-2 focus:ring-1 focus:ring-orange-500 outline-none">
+                        <button type="submit" class="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-r-lg transition">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                {{ /form:create }}
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+            &copy; {{ now format="Y" }} {{ site:name }}. All rights reserved. For educational purposes only.
+        </div>
+    </div>
+</footer>

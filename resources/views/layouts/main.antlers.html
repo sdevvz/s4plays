@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="{{ site:short_locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ seo_title ?? title ?? site:name }} | {{ site:name }}</title>
+    
+    {{# SEO Meta Tags #}}
+    <meta name="description" content="{{ seo_description ?? site:description }}">
+    {{ if seo_keywords }}
+    <meta name="keywords" content="{{ seo_keywords }}">
+    {{ /if }}
+    
+    {{# Open Graph #}}
+    <meta property="og:title" content="{{ seo_title ?? title ?? site:name }}">
+    <meta property="og:description" content="{{ seo_description ?? site:description }}">
+    <meta property="og:image" content="{{ seo_image ?? site:og_image }}">
+    <meta property="og:type" content="website">
+    
+    {{# Twitter Card #}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ seo_title ?? title ?? site:name }}">
+    <meta name="twitter:description" content="{{ seo_description ?? site:description }}">
+    <meta name="twitter:image" content="{{ seo_image ?? site:og_image }}">
+    
+    {{# Favicon #}}
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    {{# Preconnect to Font Awesome CDN #}}
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    
+    {{# Font Awesome Icons - Keep CDN for icons only #}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    {{# Robots Meta #}}
+    {{ if seo_noindex }}
+    <meta name="robots" content="noindex, nofollow">
+    {{ /if }}
+    
+    {{# Vite Assets #}}
+    {{ vite src="resources/css/site.css|resources/js/site.js" }}
+    
+    {{# Custom Page CSS #}}
+    {{ if custom_css }}
+    <style>
+        {{ custom_css }}
+    </style>
+    {{ /if }}
+    
+    {{ yield:extra_head }}
+</head>
+<body class="bg-gray-50 text-gray-800{{ if body_class }} {{ body_class }}{{ /if }}">
+
+    {{# Navigation #}}
+    {{ partial:partials/_nav }}
+
+    {{# Main Content #}}
+    <main>
+        {{ template_content }}
+    </main>
+
+    {{# Footer #}}
+    {{ partial:partials/_footer }}
+
+    {{# Notification Toast #}}
+    {{ partial:partials/_notification-toast }}
+
+    {{# Download Modal #}}
+    {{ partial:partials/_download-modal }}
+
+    {{# Custom Page JavaScript #}}
+    {{ if custom_js }}
+    <script>
+        {{ custom_js }}
+    </script>
+    {{ /if }}
+    
+    {{ yield:extra_scripts }}
+</body>
+</html>

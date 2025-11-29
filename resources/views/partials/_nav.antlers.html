@@ -1,0 +1,52 @@
+<nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all duration-300" id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            {{# Logo #}}
+            <a href="{{ homepage }}" class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-gray-900">
+                    App<span class="text-orange-500">Vault</span>
+                </span>
+            </a>
+
+            {{# Desktop Menu #}}
+            <div class="hidden md:flex space-x-8 items-center">
+                {{ nav:main }}
+                    <a href="{{ url }}" class="text-gray-600 hover:text-orange-500 font-medium transition {{ is_current || is_parent ? 'text-orange-500' : '' }}">
+                        {{ title }}
+                    </a>
+                {{ /nav:main }}
+                
+                {{ if logged_in }}
+                    <a href="/account" class="bg-orange-50 text-orange-600 px-4 py-2 rounded-full font-semibold hover:bg-orange-100 transition border border-orange-200">
+                        My Account
+                    </a>
+                {{ else }}
+                    <button class="bg-orange-50 text-orange-600 px-4 py-2 rounded-full font-semibold hover:bg-orange-100 transition border border-orange-200">
+                        Log In
+                    </button>
+                {{ /if }}
+            </div>
+
+            {{# Mobile Menu Button #}}
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-btn" class="text-gray-600 hover:text-orange-500 focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {{# Mobile Menu #}}
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-200">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {{ nav:main }}
+                <a href="{{ url }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-500 hover:bg-orange-50 {{ is_current || is_parent ? 'text-orange-500 bg-orange-50' : '' }}">
+                    {{ title }}
+                </a>
+            {{ /nav:main }}
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,284 @@
+{{# Dynamic Hero Section #}}
+<section class="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-white">
+    {{# Background Decorations #}}
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-orange-100 blur-3xl opacity-50"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-orange-50 blur-3xl opacity-50"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center max-w-3xl mx-auto">
+            {{# Update Badge #}}
+            {{ if hero_badge }}
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-orange-600 text-sm font-semibold mb-6">
+                <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                {{ hero_badge }}
+            </div>
+            {{ /if }}
+            
+            {{# Main Headline - Fully Dynamic #}}
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+                {{ hero_title_part1 ?? 'Unlock Premium' }} 
+                <span class="text-orange-500 relative">
+                    {{ hero_title_highlight ?? 'Potential' }}
+                    <svg class="absolute w-full h-3 -bottom-1 left-0 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="8" fill="none" />
+                    </svg>
+                </span>
+                {{ hero_title_part2 ?? 'For Free' }}
+            </h1>
+            
+            {{# Description #}}
+            <p class="text-lg sm:text-xl text-gray-600 mb-10 leading-relaxed">
+                {{ hero_description ?? 'Access a curated library of modded apps, freemium games, and productivity tools. No jailbreak required. Secure, fast, and constantly updated.' }}
+            </p>
+            
+            {{# CTA Buttons #}}
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{{ hero_primary_cta_url ?? '#library' }}" class="btn-pulse bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition transform hover:-translate-y-1 shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> 
+                    {{ hero_primary_cta_text ?? 'Browse Library' }}
+                </a>
+                <a href="{{ hero_secondary_cta_url ?? '#how-it-works' }}" class="bg-white text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-bold text-lg hover:border-orange-500 hover:text-orange-500 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-play"></i> 
+                    {{ hero_secondary_cta_text ?? 'How it Works' }}
+                </a>
+            </div>
+
+            {{# Trust Metrics - Dynamic Stats #}}
+            {{ if stats }}
+            <div class="mt-12 grid grid-cols-2 md:grid-cols-{{ stats | count }} gap-6 border-t border-gray-100 pt-8">
+                {{ stats }}
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ value }}</div>
+                        <div class="text-sm text-gray-500">{{ label }}</div>
+                    </div>
+                {{ /stats }}
+            </div>
+            {{ /if }}
+        </div>
+    </div>
+</section>
+
+{{# App Library Section - Fully Dynamic #}}
+<section id="library" class="py-20 bg-gray-50 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {{# Section Header - Dynamic #}}
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                {{ library_section_title_part1 ?? 'Trending' }} 
+                <span class="text-orange-500">{{ library_section_title_highlight ?? 'Apps & Games' }}</span>
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                {{ library_section_description ?? 'Our most popular downloads this week. Fully optimized for iOS and Android devices.' }}
+            </p>
+        </div>
+
+        {{# Search & Filter - Conditional Display #}}
+        {{ if library_show_search || library_show_filters }}
+        <div class="max-w-3xl mx-auto mb-12">
+            {{# Search Bar #}}
+            {{ if library_show_search }}
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400 group-focus-within:text-orange-500"></i>
+                </div>
+                <input type="text" 
+                       id="search-input" 
+                       class="block w-full pl-10 pr-3 py-4 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition shadow-sm" 
+                       placeholder="Search for apps, games, or tools...">
+            </div>
+            {{ /if }}
+            
+            {{# Category Filters #}}
+            {{ if library_show_filters }}
+            <div class="flex flex-wrap justify-center gap-3 mt-4">
+                <button class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-orange-500 text-white shadow-md transition" data-filter="all">
+                    All
+                </button>
+                {{ taxonomy:categories }}
+                    <button class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-white text-gray-600 border border-gray-200 hover:border-orange-500 hover:text-orange-500 transition" data-filter="{{ slug }}">
+                        {{ title }}
+                    </button>
+                {{ /taxonomy:categories }}
+            </div>
+            {{ /if }}
+        </div>
+        {{ /if }}
+
+        {{# App Grid - Dynamic Limit #}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="app-grid">
+            {{ collection:apps limit="{{ library_apps_limit ?? 6 }}" }}
+                {{ partial:partials/_app-card }}
+            {{ /collection:apps }}
+        </div>
+        
+        {{# View All Button #}}
+        {{ if library_view_all_text }}
+        <div class="mt-12 text-center">
+            <a href="{{ library_view_all_url ?? '/apps' }}" class="text-orange-600 font-semibold hover:text-orange-700 flex items-center justify-center gap-2 mx-auto">
+                {{ library_view_all_text ?? 'View All Apps' }} <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+        {{ /if }}
+    </div>
+</section>
+
+{{# Features Section - Fully Dynamic #}}
+<section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {{# Features List - Dynamic #}}
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                    {{ features_section_title_part1 ?? 'Why Choose' }} 
+                    <span class="text-orange-500">{{ features_section_title_highlight ?? 'AppVault?' }}</span>
+                </h2>
+                
+                {{ if features }}
+                <div class="space-y-8">
+                    {{ features }}
+                        <div class="flex gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 text-xl">
+                                <i class="{{ icon }}"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ title }}</h3>
+                                <p class="text-gray-600">{{ description }}</p>
+                            </div>
+                        </div>
+                    {{ /features }}
+                </div>
+                {{ else }}
+                {{# Default Features if none are set #}}
+                <div class="space-y-8">
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 text-xl">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Safe & Secure</h3>
+                            <p class="text-gray-600">Every file is scanned by 50+ antivirus engines before being listed.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 text-xl">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">High Speed Downloads</h3>
+                            <p class="text-gray-600">Our dedicated CDN ensures you get your files instantly.</p>
+                        </div>
+                    </div>
+                </div>
+                {{ /if }}
+            </div>
+            
+            {{# Installation Mockup #}}
+            <div class="relative">
+                <div class="absolute inset-0 bg-gradient-to-tr from-orange-400 to-orange-600 transform rotate-3 rounded-2xl opacity-20"></div>
+                <div class="relative bg-gray-50 border border-gray-100 rounded-2xl p-8 shadow-xl">
+                    <div class="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
+                        <span class="font-bold text-gray-700">Installation Status</span>
+                        <span class="text-green-500 text-sm font-bold">
+                            <i class="fa-solid fa-circle text-[10px] mr-1"></i> Connected
+                        </span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Unpacking resources...</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-orange-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Injecting Script...</span>
+                            <span>100%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-orange-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-600">
+                            <span>Finalizing...</span>
+                            <span>Done</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        
+                        <div class="mt-6 bg-green-50 text-green-700 p-3 rounded-lg text-center font-medium text-sm">
+                            <i class="fa-solid fa-check-circle mr-2"></i> App Successfully Installed
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{# Custom CSS/JS from Page Settings #}}
+{{ if custom_css }}
+{{ section:extra_head }}
+<style>
+{{ custom_css }}
+</style>
+{{ /section:extra_head }}
+{{ /if }}
+
+{{# JavaScript Section #}}
+{{ section:extra_scripts }}
+{{ if library_show_search }}
+<script>
+    // Search Functionality
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.glass-card');
+        
+        cards.forEach(card => {
+            const title = card.querySelector('h3').innerText.toLowerCase();
+            if(title.includes(term)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{{ /if }}
+
+{{ if library_show_filters }}
+<script>
+    // Filter Functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // UI Toggle
+            filterBtns.forEach(b => {
+                b.classList.remove('bg-orange-500', 'text-white');
+                b.classList.add('bg-white', 'text-gray-600');
+            });
+            btn.classList.remove('bg-white', 'text-gray-600');
+            btn.classList.add('bg-orange-500', 'text-white');
+            
+            // Filter Logic
+            const filter = btn.getAttribute('data-filter');
+            const cards = document.querySelectorAll('.glass-card');
+            
+            cards.forEach(card => {
+                if(filter === 'all' || card.getAttribute('data-category') === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+{{ /if }}
+
+{{ if custom_js }}
+<script>
+{{ custom_js }}
+</script>
+{{ /if }}
+{{ /section:extra_scripts }}
