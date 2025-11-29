@@ -24,3 +24,38 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Statamic SSG Output
+/storage/app/static/*
+!/storage/app/static/.gitkeep
+
+# Vite Build
+/public/build/*
+!/public/build/.gitkeep
+
+# Node
+/node_modules
+npm-debug.log
+
+# Composer
+/vendor
+
+# Environment
+.env
+.env.backup
+
+# IDE
+/.idea
+/.vscode
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Statamic
+/public/css/*
+/public/js/*
+/storage/*.key
+/storage/statamic/*
+!/storage/statamic/.gitkeep
