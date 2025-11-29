@@ -1,0 +1,188 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches:
+      - main
+      - production
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
+          coverage: none
+
+      # 3. Cache Composer dependencies
+      - name: 📦 Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: 🔄 Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      # 4. Install Composer dependencies
+      - name: 📦 Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
+
+      # 5. Setup Node.js
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 6. Install NPM dependencies
+      - name: 📦 Install NPM dependencies
+        run: npm ci
+
+      # 7. Build assets with Vite
+      - name: 🏗️ Build assets
+        run: npm run build
+
+      # 8. Create .env file
+      - name: ⚙️ Create .env file
+        run: |
+          echo "APP_NAME=\"AppVault\"" > .env
+          echo "APP_ENV=production" >> .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "APP_DEBUG=false" >> .env
+          echo "APP_URL=${{ secrets.APP_URL }}" >> .env
+          echo "STATAMIC_LICENSE_KEY=${{ secrets.STATAMIC_LICENSE_KEY }}" >> .env
+          echo "STATAMIC_STACHE_WATCHER=false" >> .env
+          echo "STATAMIC_STATIC_CACHING_STRATEGY=full" >> .env
+
+      # 9. Generate application key if needed
+      - name: 🔑 Generate application key
+        run: |
+          if [ -z "${{ secrets.APP_KEY }}" ]; then
+            php artisan key:generate
+          fi
+
+      # 10. Clear and optimize caches
+      - name: 🧹 Clear caches
+        run: |
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+
+      # 11. Optimize for production
+      - name: ⚡ Optimize
+        run: |
+          php artisan route:cache
+          php artisan view:cache
+
+      # 12. Generate static site
+      - name: 🎨 Generate static site
+        run: |
+          php artisan cache:clear
+          php please ssg:generate
+        env:
+          APP_ENV: production
+
+      # 13. Verify build directory was copied
+      - name: ✅ Verify build directory
+        run: |
+          echo "Checking build directory in static output..."
+          if [ -d "storage/app/static/build" ]; then
+            echo "✅ Build directory found!"
+            echo "Files in build directory:"
+            ls -lh storage/app/static/build/ | head -20
+          else
+            echo "❌ Build directory NOT found! Copying manually..."
+            mkdir -p storage/app/static/build
+            cp -r public/build/* storage/app/static/build/
+          fi
+          
+          echo ""
+          echo "Checking for CSS and JS files:"
+          find storage/app/static/build -name "*.css" -o -name "*.js" | head -10
+          
+          echo ""
+          echo "Verifying manifest.json:"
+          if [ -f "storage/app/static/build/manifest.json" ]; then
+            echo "✅ Manifest found!"
+            cat storage/app/static/build/manifest.json
+          else
+            echo "⚠️ Manifest not found!"
+          fi
+
+      # 14. Create _redirects file for Netlify
+      - name: 🔀 Create Netlify redirects
+        run: |
+          cat > storage/app/static/_redirects << 'EOF'
+          # Redirect all 404s to the custom 404 page
+          /*    /404.html   404
+          
+          # Force HTTPS
+          http://:splat  https://:splat  301!
+          EOF
+
+      # 15. Create _headers file for Netlify
+      - name: 📋 Create Netlify headers
+        run: |
+          cat > storage/app/static/_headers << 'EOF'
+          # Cache static assets for 1 year
+          /build/*
+            Cache-Control: public, max-age=31536000, immutable
+          
+          /assets/*
+            Cache-Control: public, max-age=31536000, immutable
+          
+          # Security headers
+          /*
+            X-Frame-Options: DENY
+            X-Content-Type-Options: nosniff
+            X-XSS-Protection: 1; mode=block
+            Referrer-Policy: strict-origin-when-cross-origin
+            Permissions-Policy: geolocation=(), microphone=(), camera=()
+          EOF
+
+      # 16. List generated files (for debugging)
+      - name: 📂 List static files
+        run: |
+          echo "Generated files:"
+          ls -la storage/app/static/
+          echo "Total size:"
+          du -sh storage/app/static/
+
+      # 17. Deploy to Netlify
+      - name: 🚀 Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.1
+        with:
+          publish-dir: './storage/app/static'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions - ${{ github.event.head_commit.message }}"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      # 18. Deployment summary
+      - name: ✅ Deployment Summary
+        run: |
+          echo "🎉 Deployment completed successfully!"
+          echo "📦 Static files generated in: storage/app/static"
+          echo "🌐 Site URL: ${{ secrets.APP_URL }}"
