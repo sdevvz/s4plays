@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'base_url' => config('app.url'),
+    'base_url' => env('APP_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------
@@ -31,28 +31,83 @@ return [
     | Files and Symlinks
     |--------------------------------------------------------------------------
     |
-    | You are free to define a set of directories to be copied along with the
-    | generated HTML files. For example, you may want to link your CSS,
-    | JavaScript, static images, and perhaps any uploaded assets.
-    | You may choose to symlink rather than copy.
+    | This option defines whether files should be copied or symlinked.
+    | Symlinking is more performant, but may not work on all systems.
+    |
+    */
+
+    'copy_files' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Build Directory
+    |--------------------------------------------------------------------------
+    |
+    | The build directory (from Vite) that should be copied to the static site.
+    |
+    */
+
+    'build_directory' => public_path('build'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Additional Files and Directories
+    |--------------------------------------------------------------------------
+    |
+    | Specify any files or directories that should be copied to the
+    | destination directory. Provide the path relative to the public
+    | directory as the key, and the destination path as the value.
     |
     */
 
     'copy' => [
-        public_path('build') => 'build',
-        public_path('assets') => 'assets',
-        public_path('js') => 'assets',
-        public_path('css') => 'assets',
-        public_path('img') => 'img',
-    ],
-
-    'symlinks' => [
-         public_path('build') => 'build',
+        'build' => 'build',
+        'favicon.ico' => 'favicon.ico',
+        'favicon.png' => 'favicon.png',
+        // Add any other assets you need
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Additional URLs
+    | Exclude URLs
+    |--------------------------------------------------------------------------
+    |
+    | Specify any URLs that should not be generated as static pages.
+    |
+    */
+
+    'exclude' => [
+        // 'secret-page',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Glide Route
+    |--------------------------------------------------------------------------
+    |
+    | Whether to generate the Glide route. This is required if you use
+    | Glide to generate images. You'll need to set up a serverless
+    | function or similar to handle image generation on-the-fly.
+    |
+    */
+
+    'glide' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Workers
+    |--------------------------------------------------------------------------
+    |
+    | The number of concurrent workers to use when generating the site.
+    | More workers = faster generation, but uses more memory.
+    |
+    */
+
+    'workers' => env('SSG_WORKERS', 1),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Extra URLs
     |--------------------------------------------------------------------------
     |
     | Here you may define a list of additional URLs to be generated,
@@ -61,63 +116,36 @@ return [
     */
 
     'urls' => [
-        //
-        '/apps',
+        // '/custom-route',
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Exclude URLs
+    | Before Generate Callback
     |--------------------------------------------------------------------------
     |
-    | Here you may define a list of URLs that should not be generated.
+    | This callback is fired before generating the site. You can use it
+    | to prepare your site, such as clearing caches.
     |
     */
 
-    'exclude' => [
-        //
-    ],
+    'before' => function () {
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    },
 
     /*
     |--------------------------------------------------------------------------
-    | Pagination Route
+    | After Generate Callback
     |--------------------------------------------------------------------------
     |
-    | Here you may define how paginated entries are routed. This will take
-    | effect wherever pagination is detected in your antlers templates,
-    | like if you use the `paginate` param on the `collection` tag.
+    | This callback is fired after generating the site. You can use it
+    | to perform cleanup or additional processing.
     |
     */
 
-    'pagination_route' => '{url}/{page_name}/{page_number}',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Glide
-    |--------------------------------------------------------------------------
-    |
-    | Glide images are dynamically resized server-side when requesting a URL.
-    | On a static site, you would just be serving HTML files without PHP.
-    | Glide images will be pre-generated into the given directory.
-    |
-    */
-
-    'glide' => [
-        'directory' => 'img',
-        'override' => true,
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Failures
-    |--------------------------------------------------------------------------
-    |
-    | You may configure whether the console command will exit early with a
-    | failure status code when it encounters errors or warnings. You may
-    | want to do this to prevent deployments in CI environments, etc.
-    |
-    */
-
-    'failures' => false, // 'errors' or 'warnings'
+    'after' => function ($paths) {
+        // Log generated paths
+        \Illuminate\Support\Facades\Log::info('SSG generated ' . count($paths) . ' pages');
+    },
 
 ];
