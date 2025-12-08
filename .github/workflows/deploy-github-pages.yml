@@ -2,7 +2,7 @@ name: Build & Deploy Statamic (SSG) to GitHub Pages
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_ENV: production
-      # set APP_KEY and APP_URL via repository Secrets (see instructions below)
       APP_KEY: ${{ secrets.APP_KEY }}
       APP_URL: ${{ secrets.APP_URL }}
     steps:
@@ -27,17 +26,16 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v4
         with:
-          php-version: '8.2'        # adjust to the version your site uses
+          php-version: "8.2"
           extensions: mbstring, xml, gd, bcmath, zip, intl
-          coverage: none
 
       - name: Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Setup Node (if needed) and build frontend assets
+      - name: Setup Node and build frontend (if package.json exists)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
         run: |
           if [ -f package.json ]; then
             npm ci
@@ -46,22 +44,20 @@ jobs:
             echo "no package.json found, skipping npm build"
           fi
 
-      - name: Generate app key (sanity) and warm stache
+      - name: Generate app key (if needed) and warm stache
         run: |
-          # Make sure an app key is available to the application (APP_KEY injected via env/secrets)
-          php artisan key:generate --force || echo "key generate may be skipped if APP_KEY provided"
+          php artisan key:generate --force || echo "key generate skipped if APP_KEY provided"
           php please stache:warm -n -q
 
       - name: Generate static site with Statamic SSG
-        run: |
-          php please ssg:generate
+        run: php please ssg:generate
 
       - name: Show static output count (debug)
         run: |
           echo "Static output preview:"
-          ls -la storage/app/static | sed -n '1,50p' || true
+          ls -la storage/app/static || true
 
-      - name: Prepare GitHub Pages (configure)
+      - name: Configure Pages
         uses: actions/configure-pages@v4
 
       - name: Upload Pages artifact
