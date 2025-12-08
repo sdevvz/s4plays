@@ -79,5 +79,4 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Print published URL
-        # Print the page_url output directly inside run (avoids env mapping issues)
         run: echo "Published site: ${{ steps.deploy.outputs.page_url }}"
