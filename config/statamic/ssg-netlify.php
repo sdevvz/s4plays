@@ -185,19 +185,45 @@ return [
         // Log generated pages
         \Illuminate\Support\Facades\Log::info('SSG generated ' . count($paths) . ' pages');
         
-        // Create .nojekyll file (tells GitHub Pages not to use Jekyll)
-        file_put_contents($destination . '/.nojekyll', '');
-        \Illuminate\Support\Facades\Log::info('Created .nojekyll file for GitHub Pages');
+        // Create _redirects file for Netlify
+        $redirects = <<<'EOD'
+# Netlify Redirects
+/*    /404.html   404
+
+# Force HTTPS
+http://:splat  https://:splat  301!
+
+# Remove trailing slashes (optional)
+# /*/ /:splat 301!
+EOD;
+        file_put_contents($destination . '/_redirects', $redirects);
+        \Illuminate\Support\Facades\Log::info('Created _redirects file');
         
-        // Create CNAME file if custom domain is set
-        $customDomain = env('GITHUB_PAGES_DOMAIN');
-        if ($customDomain) {
-            file_put_contents($destination . '/CNAME', $customDomain);
-            \Illuminate\Support\Facades\Log::info('Created CNAME file: ' . $customDomain);
-        }
-        
-        // Note: GitHub Pages doesn't support _redirects or _headers
-        // 404 handling is done via 404.html file
+        // Create _headers file for Netlify
+        $headers = <<<'EOD'
+# Cache static assets
+/build/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+EOD;
+        file_put_contents($destination . '/_headers', $headers);
+        \Illuminate\Support\Facades\Log::info('Created _headers file');
         
         // Verify build directory was copied
         $buildDestination = $destination . '/build';
@@ -215,7 +241,6 @@ return [
             'base_url' => config('statamic.ssg.base_url'),
             'php_version' => PHP_VERSION,
             'statamic_version' => \Statamic\Statamic::version(),
-            'platform' => 'GitHub Pages',
         ];
         file_put_contents($destination . '/deploy-info.json', json_encode($deployInfo, JSON_PRETTY_PRINT));
         
@@ -229,7 +254,7 @@ return [
             }
         }
         
-        \Illuminate\Support\Facades\Log::info('SSG generation completed successfully for GitHub Pages!');
+        \Illuminate\Support\Facades\Log::info('SSG generation completed successfully!');
     },
 
     /*
