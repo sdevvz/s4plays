@@ -122,26 +122,7 @@ jobs:
             cp -r public/build/* storage/app/static/build/
           fi
 
-      # 14. Fix paths for GitHub Pages subdirectory
-      - name: 🔧 Fix GitHub Pages paths
-        run: |
-          echo "Fixing asset paths for GitHub Pages subdirectory..."
-          STATIC_DIR="storage/app/static"
-          REPO_NAME="z4plays"
-          
-          # Fix paths in all HTML files
-          find "$STATIC_DIR" -name "*.html" -type f -exec sed -i \
-            -e "s|href=\"/build/|href=\"/$REPO_NAME/build/|g" \
-            -e "s|src=\"/build/|src=\"/$REPO_NAME/build/|g" \
-            -e "s|href=\"/assets/|href=\"/$REPO_NAME/assets/|g" \
-            -e "s|src=\"/assets/|src=\"/$REPO_NAME/assets/|g" \
-            {} \;
-          
-          echo "✅ Paths fixed!"
-          echo "Sample path from index.html:"
-          grep -o 'href="[^"]*build[^"]*"' "$STATIC_DIR/index.html" | head -2
-
-      # 15. Create .nojekyll file (important for GitHub Pages!)
+      # 14. Create .nojekyll file (important for GitHub Pages!)
       - name: 📝 Create .nojekyll file
         run: |
           touch storage/app/static/.nojekyll
@@ -155,7 +136,7 @@ jobs:
             cp storage/app/static/index.html storage/app/static/404.html 2>/dev/null || echo "404.html will be created from template"
           fi
 
-      # 17. List generated files
+      # 16. List generated files
       - name: 📂 List static files
         run: |
           echo "Generated files:"
@@ -167,7 +148,7 @@ jobs:
           echo "HTML files:"
           find storage/app/static -name "*.html" | wc -l
 
-      # 18. Upload artifact for GitHub Pages
+      # 17. Upload artifact for GitHub Pages
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
