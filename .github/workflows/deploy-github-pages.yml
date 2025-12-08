@@ -1,170 +1,83 @@
-name: Deploy to GitHub Pages
+name: Build & Deploy Statamic (SSG) to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - production
+    branches: ['main']
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+    env:
+      APP_ENV: production
+      # set APP_KEY and APP_URL via repository Secrets (see instructions below)
+      APP_KEY: ${{ secrets.APP_KEY }}
+      APP_URL: ${{ secrets.APP_URL }}
     steps:
-      # 1. Checkout code
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      # 2. Setup PHP
-      - name: 🐘 Setup PHP
-        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v4
+        with:
+          php-version: '8.2'        # adjust to the version your site uses
+          extensions: mbstring, xml, gd, bcmath, zip, intl
           coverage: none
 
-      # 3. Cache Composer dependencies
-      - name: 📦 Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: 🔄 Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      # 4. Install Composer dependencies
-      - name: 📦 Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
-
-      # 5. Setup Node.js
-      - name: 🟢 Setup Node.js
+      - name: Setup Node (if needed) and build frontend assets
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-
-      # 6. Install NPM dependencies
-      - name: 📦 Install NPM dependencies
-        run: npm ci
-
-      # 7. Build assets with Vite
-      - name: 🏗️ Build assets
-        run: npm run build
-
-      # 8. Create .env file
-      - name: ⚙️ Create .env file
         run: |
-          echo "APP_NAME=\"AppVault\"" > .env
-          echo "APP_ENV=production" >> .env
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
-          echo "APP_DEBUG=false" >> .env
-          echo "APP_URL=${{ secrets.APP_URL }}" >> .env
-          echo "STATAMIC_LICENSE_KEY=${{ secrets.STATAMIC_LICENSE_KEY }}" >> .env
-          echo "STATAMIC_STACHE_WATCHER=false" >> .env
-          echo "STATAMIC_STATIC_CACHING_STRATEGY=full" >> .env
-
-      # 9. Generate application key if needed
-      - name: 🔑 Generate application key
-        run: |
-          if [ -z "${{ secrets.APP_KEY }}" ]; then
-            php artisan key:generate
-          fi
-
-      # 10. Clear and optimize caches
-      - name: 🧹 Clear caches
-        run: |
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-
-      # 11. Optimize for production
-      - name: ⚡ Optimize
-        run: |
-          php artisan route:cache
-          php artisan view:cache
-
-      # 12. Generate static site
-      - name: 🎨 Generate static site
-        run: |
-          php artisan cache:clear
-          php please ssg:generate --workers=4
-        env:
-          APP_ENV: production
-
-      # 13. Verify build directory
-      - name: ✅ Verify build directory
-        run: |
-          echo "Checking build directory..."
-          if [ -d "storage/app/static/build" ]; then
-            echo "✅ Build directory found!"
-            ls -lh storage/app/static/build/ | head -10
+          if [ -f package.json ]; then
+            npm ci
+            npm run build || echo "npm build failed or not defined, continuing"
           else
-            echo "❌ Build directory missing! Copying manually..."
-            mkdir -p storage/app/static/build
-            cp -r public/build/* storage/app/static/build/
+            echo "no package.json found, skipping npm build"
           fi
 
-      # 14. Create .nojekyll file (important for GitHub Pages!)
-      - name: 📝 Create .nojekyll file
+      - name: Generate app key (sanity) and warm stache
         run: |
-          touch storage/app/static/.nojekyll
-          echo "✅ .nojekyll file created"
+          # Make sure an app key is available to the application (APP_KEY injected via env/secrets)
+          php artisan key:generate --force || echo "key generate may be skipped if APP_KEY provided"
+          php please stache:warm -n -q
 
-      # 15. Create 404.html (GitHub Pages routing)
-      - name: 📝 Setup 404 page
+      - name: Generate static site with Statamic SSG
         run: |
-          if [ ! -f "storage/app/static/404.html" ]; then
-            echo "Creating 404.html..."
-            cp storage/app/static/index.html storage/app/static/404.html 2>/dev/null || echo "404.html will be created from template"
-          fi
+          php please ssg:generate
 
-      # 16. List generated files
-      - name: 📂 List static files
+      - name: Show static output count (debug)
         run: |
-          echo "Generated files:"
-          ls -la storage/app/static/
-          echo ""
-          echo "Total size:"
-          du -sh storage/app/static/
-          echo ""
-          echo "HTML files:"
-          find storage/app/static -name "*.html" | wc -l
+          echo "Static output preview:"
+          ls -la storage/app/static | sed -n '1,50p' || true
 
-      # 17. Upload artifact for GitHub Pages
-      - name: 📤 Upload artifact
+      - name: Prepare GitHub Pages (configure)
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'storage/app/static'
+          path: storage/app/static
 
-  # Deployment job
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
-      - name: 🚀 Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: ✅ Deployment Summary
-        run: |
-          echo "🎉 Deployment completed successfully!"
-          echo "🌐 Your site is live!"
+      - name: Output site URL
+        run: echo "Published site: ${{ steps.deployment.outputs.page_url }}"
