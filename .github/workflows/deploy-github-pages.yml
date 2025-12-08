@@ -27,41 +27,39 @@ jobs:
         uses: shivammathur/setup-php@v4
         with:
           php-version: "8.2"
-          extensions:
-            - mbstring
-            - xml
-            - gd
-            - bcmath
-            - zip
-            - intl
+          # extensions must be provided as a comma-separated string (not a YAML list)
+          extensions: "mbstring, xml, gd, bcmath, zip, intl"
 
       - name: Install Composer dependencies
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Setup Node and build frontend (if package.json exists)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Build frontend assets (if package.json exists)
         run: |
           if [ -f package.json ]; then
             npm ci
-            npm run build || echo "npm build failed or not defined, continuing"
+            npm run build || echo "npm build failed or not defined — continuing"
           else
-            echo "no package.json found, skipping npm build"
+            echo "no package.json found, skipping frontend build"
           fi
 
       - name: Generate app key (if needed) and warm stache
         run: |
-          php artisan key:generate --force || echo "key generate skipped if APP_KEY provided"
+          php artisan key:generate --force || echo "key generation skipped if APP_KEY provided"
           php please stache:warm -n -q
 
       - name: Generate static site with Statamic SSG
         run: php please ssg:generate
 
-      - name: Show static output count (debug)
+      - name: Show static output (debug)
         run: |
-          echo "Static output preview:"
+          echo "Static output preview (first 200 lines):"
           ls -la storage/app/static || true
+          find storage/app/static -maxdepth 2 -type f | sed -n '1,200p' || true
 
       - name: Configure Pages
         uses: actions/configure-pages@v4
@@ -78,4 +76,10 @@ jobs:
       name: github-pages
     steps:
       - name: Deploy to GitHub Pages
+        id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Print published URL
+        run: echo "Published site: $PAGES_URL"
+        env:
+          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
