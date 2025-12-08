@@ -27,7 +27,6 @@ jobs:
         uses: shivammathur/setup-php@v4
         with:
           php-version: "8.2"
-          # extensions must be provided as a comma-separated string (not a YAML list)
           extensions: "mbstring, xml, gd, bcmath, zip, intl"
 
       - name: Install Composer dependencies
@@ -80,6 +79,5 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Print published URL
-        run: echo "Published site: $PAGES_URL"
-        env:
-          PAGES_URL: ${{ steps.deploy.outputs.page_url }}
+        # Print the page_url output directly inside run (avoids env mapping issues)
+        run: echo "Published site: ${{ steps.deploy.outputs.page_url }}"
