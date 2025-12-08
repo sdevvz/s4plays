@@ -66,6 +66,8 @@ jobs:
       # 7. Build assets with Vite
       - name: 🏗️ Build assets
         run: npm run build
+        env:
+          NODE_ENV: production
 
       # 8. Create .env file
       - name: ⚙️ Create .env file
@@ -97,6 +99,7 @@ jobs:
       # 11. Optimize for production
       - name: ⚡ Optimize
         run: |
+          php artisan config:cache
           php artisan route:cache
           php artisan view:cache
 
