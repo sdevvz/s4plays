@@ -74,6 +74,39 @@ sections:
           type: text
           display: Badge
           default: FREE
+      -
+        handle: download_locker_url
+        field:
+          type: text
+          display: 'Download Locker URL'
+          instructions: 'Enter the CPA locker URL for this app (e.g., CPAGrip, OGAds link)'
+          placeholder: 'https://your-cpa-locker-url.com/...'
+          validate:
+            - url
+          width: 100
+          input_type: url
+      -
+        handle: locker_type
+        field:
+          type: select
+          display: 'Locker Type'
+          instructions: 'Optional: Specify the type of locker for tracking'
+          options:
+            cpagrip: 'CPAGrip'
+            ogads: 'OGAds'
+            adgate: 'AdGate Media'
+            cpalead: 'CPALead'
+            other: 'Other'
+          default: cpagrip
+          width: 50
+      -
+        handle: enable_locker
+        field:
+          type: toggle
+          display: 'Enable Locker'
+          instructions: 'Toggle off for direct download (no locker)'
+          default: true
+          width: 50
   seo:
     display: SEO
     fields:

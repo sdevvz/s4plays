@@ -34,8 +34,20 @@
     </p>
     
     {{# Download Button #}}
-    <button onclick="openModal('{{ title }}')" 
-            class="w-full bg-gray-900 hover:bg-orange-500 text-white font-medium py-3 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
-        Download Now <i class="fa-solid fa-cloud-arrow-down"></i>
-    </button>
+    {{ if enable_locker && download_locker_url }}
+        {{# With CPA Locker #}}
+        <a href="{{ download_locker_url }}" 
+           target="_blank"
+           rel="noopener noreferrer"
+           data-locker-type="{{ locker_type ?? 'cpagrip' }}"
+           class="w-full bg-gray-900 hover:bg-orange-500 text-white font-medium py-3 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2 app-download-btn">
+            Download Now <i class="fa-solid fa-cloud-arrow-down"></i>
+        </a>
+    {{ else }}
+        {{# Direct Download (No Locker) #}}
+        <button onclick="openModal('{{ title }}')" 
+                class="w-full bg-gray-900 hover:bg-orange-500 text-white font-medium py-3 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
+            Download Now <i class="fa-solid fa-cloud-arrow-down"></i>
+        </button>
+    {{ /if }}
 </div>

@@ -9,5 +9,8 @@ rating: '4.5'
 downloads: 1M+
 badge: FREE
 updated_by: 9c99b646-dcf0-426d-a10d-b038848592d5
-updated_at: 1764335445
+updated_at: 1765199339
+download_locker_url: 'https://redirectapps.org/cl/i/x6e381'
+locker_type: ogads
+enable_locker: true
 ---
