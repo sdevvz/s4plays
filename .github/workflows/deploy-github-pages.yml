@@ -96,6 +96,7 @@ jobs:
       # 11. Optimize for production
       - name: ⚡ Optimize
         run: |
+          php artisan config:cache
           php artisan route:cache
           php artisan view:cache
 
@@ -103,7 +104,7 @@ jobs:
       - name: 🎨 Generate static site
         run: |
           php artisan cache:clear
-          php please ssg:generate --workers=4
+          php please ssg:generate
         env:
           APP_ENV: production
 
