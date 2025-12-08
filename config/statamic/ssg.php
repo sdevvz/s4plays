@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'base_url' => env('APP_URL', 'http://localhost'),
+    'base_url' => env('APP_URL', 'https://sdeviz.github.io/z4plays'),
 
     /*
     |--------------------------------------------------------------------------
