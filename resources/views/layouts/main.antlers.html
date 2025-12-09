@@ -10,8 +10,7 @@
     {{ if seo_keywords }}
     <meta name="keywords" content="{{ seo_keywords }}">
     {{ /if }}
-    <script type="text/javascript" id="ogjs" src="https://redirectapps.org/cl/js/1xo95k"></script>
-
+    
     {{# Open Graph #}}
     <meta property="og:title" content="{{ seo_title ?? title ?? site:name }}">
     <meta property="og:description" content="{{ seo_description ?? site:description }}">
@@ -37,16 +36,10 @@
     {{ if seo_noindex }}
     <meta name="robots" content="noindex, nofollow">
     {{ /if }}
-    <link rel="stylesheet" type="text/css" href="build/assets/site-Bya9WIdL.css">
-    <script src="build/assets/site-ByZTwbg1.js" defer></script>
-    <link rel="stylesheet" type="text/css" href="build/assets/site-Bya9WIdL.css">
-    <script src="build/assets/site-ByZTwbg1.js" defer></script>
-<!-- instead of href="/css/app.css" -->
-<link rel="stylesheet" href="build/assets/site-Bya9WIdL.css">
-<script src="build/assets/site-ByZTwbg1.js" defer></script>
-
+    
     {{# Vite Assets #}}
-    {{ vite src="resources/css/site.css|resources/js/site.js" }}
+    {{ vite:css src="resources/css/site.css" }}
+    {{ vite:js src="resources/js/site.js" }}
     
     {{# Custom Page CSS #}}
     {{ if custom_css }}
@@ -56,8 +49,6 @@
     {{ /if }}
     
     {{ yield:extra_head }}
-
-    
 </head>
 <body class="bg-gray-50 text-gray-800{{ if body_class }} {{ body_class }}{{ /if }}">
 
