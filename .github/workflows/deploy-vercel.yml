@@ -1,108 +1,61 @@
-name: Deploy to Vercel
+name: Deploy Statamic SSG to Vercel
 
 on:
   push:
-    branches: [main, production]
-  workflow_dispatch:
+    branches: [ main ]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # 1. Checkout
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup PHP
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
+          extensions: mbstring, dom, fileinfo, gd
 
-      # 3. Composer Cache
-      - name: 📦 Composer Cache
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
-      - name: 🔄 Cache Composer
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-
-      # 4. Install Composer
-      - name: 📦 Install Composer Dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction
-
-      # 5. Setup Node
-      - name: 🟢 Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      # 6. Install NPM
-      - name: 📦 Install NPM Dependencies
+      - name: Install NPM Dependencies
         run: npm ci
 
-      # 7. Build Assets
-      - name: 🏗️ Build Assets
+      - name: Build Assets (Vite)
         run: npm run build
+        # لا نحتاج لـ ASSET_URL مع Vercel
 
-      # 8. Create .env
-      - name: ⚙️ Create .env
-        run: |
-          echo "APP_NAME=AppVault" > .env
-          echo "APP_ENV=production" >> .env
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
-          echo "APP_DEBUG=false" >> .env
-          echo "APP_URL=https://s4plays.vercel.app" >> .env
-          echo "STATAMIC_LICENSE_KEY=${{ secrets.STATAMIC_LICENSE_KEY }}" >> .env
+      - name: Generate Static Site
+        run: php please ssg:generate
+        env:
+          APP_KEY: ${{ secrets.APP_KEY }}
+          # هنا لا يهم الرابط كثيراً لأن المسارات ستكون من الجذر، لكن يفضل وضعه
+          APP_URL: https://YOUR-PROJECT.vercel.app 
 
-      # 9. Generate Key
-      - name: 🔑 Generate Key
-        run: php artisan key:generate || echo "Key exists"
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
 
-      # 10. Clear Caches
-      - name: 🧹 Clear Caches
-        run: |
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      # 11. Optimize
-      - name: ⚡ Optimize
-        run: |
-          php artisan route:cache
-          php artisan view:cache
+      - name: Build Project Artifacts (Vercel)
+        # هذه الخطوة تخبر Vercel أننا نريد رفع المجلد storage/app/static
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-      # 12. Generate Static Site
-      - name: 🎨 Generate Static Site
-        run: php please ssg:generate --workers=4
-
-      # 13. Verify
-      - name: ✅ Verify Build
-        run: |
-          echo "Checking output..."
-          ls -la storage/app/static/ | head -10
-          
-          if [ -d "storage/app/static/build" ]; then
-            echo "✅ Build directory exists"
-          else
-            echo "❌ Build missing - copying..."
-            mkdir -p storage/app/static/build
-            cp -r public/build/* storage/app/static/build/
-          fi
-
-      # 14. Deploy to Vercel
-      - name: 🚀 Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./storage/app/static
-          vercel-args: '--prod'
+      - name: Deploy to Vercel
+        # الأمر prebuilt يرفع الملفات الجاهزة فقط ولا يحاول تشغيل أوامر بناء داخل فيرسل
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: storage/app/static # قد تحتاج لتعديل إعدادات vercel.json بدلاً من هذا السطر، انظر للملاحظة بالأسفل
