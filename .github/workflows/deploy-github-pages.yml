@@ -2,19 +2,14 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - production
+    branches: [main, production]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
-  actions: read
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -24,156 +19,129 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Checkout code
-      - name: 📥 Checkout code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      # 2. Setup PHP
       - name: 🐘 Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
-          coverage: none
 
-      # 3. Cache Composer dependencies
-      - name: 📦 Get Composer Cache Directory
+      - name: 📦 Composer Cache
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: 🔄 Cache Composer dependencies
+      - name: 🔄 Cache Composer
         uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      # 4. Install Composer dependencies
-      - name: 📦 Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
-      # 5. Setup Node.js
-      - name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # 6. Install NPM dependencies
-      - name: 📦 Install NPM dependencies
+      - name: 📦 Install NPM Dependencies
         run: npm ci
 
-      # 7. Build assets with Vite
-      - name: 🏗️ Build assets
+      - name: 🏗️ Build Assets
         run: npm run build
-        env:
-          NODE_ENV: production
 
-      # 8. Create .env file
-      - name: ⚙️ Create .env file
+      - name: ⚙️ Create .env
         run: |
-          echo "APP_NAME=\"AppVault\"" > .env
+          echo "APP_NAME=AppVault" > .env
           echo "APP_ENV=production" >> .env
           echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
           echo "APP_DEBUG=false" >> .env
-          echo "APP_URL=${{ secrets.APP_URL }}" >> .env
+          echo "APP_URL=https://sdeviz.github.io/z4plays" >> .env
           echo "STATAMIC_LICENSE_KEY=${{ secrets.STATAMIC_LICENSE_KEY }}" >> .env
-          echo "STATAMIC_STACHE_WATCHER=false" >> .env
-          echo "STATAMIC_STATIC_CACHING_STRATEGY=full" >> .env
 
-      # 9. Generate application key if needed
-      - name: 🔑 Generate application key
-        run: |
-          if [ -z "${{ secrets.APP_KEY }}" ]; then
-            php artisan key:generate
-          fi
+      - name: 🔑 Generate Key
+        run: php artisan key:generate || echo "Key exists"
 
-      # 10. Clear and optimize caches
-      - name: 🧹 Clear caches
+      - name: 🧹 Clear Caches
         run: |
           php artisan cache:clear
           php artisan config:clear
           php artisan route:clear
           php artisan view:clear
 
-      # 11. Optimize for production
       - name: ⚡ Optimize
         run: |
           php artisan route:cache
           php artisan view:cache
 
-      # 12. Generate static site
-      - name: 🎨 Generate static site
-        run: |
-          php artisan cache:clear
-          php please ssg:generate
-        env:
-          APP_ENV: production
+      - name: 🎨 Generate Static Site
+        run: php please ssg:generate --workers=4
 
-      # 13. Verify build directory
-      - name: ✅ Verify build directory
+      - name: ✅ Verify Build
         run: |
-          echo "Checking build directory..."
+          echo "=== Checking static output ==="
+          ls -la storage/app/static/ | head -20
+          
+          echo ""
+          echo "=== Checking build directory ==="
           if [ -d "storage/app/static/build" ]; then
-            echo "✅ Build directory found!"
-            ls -lh storage/app/static/build/ | head -10
+            echo "✅ Build directory exists"
+            ls -la storage/app/static/build/ | head -10
           else
-            echo "❌ Build directory missing! Copying manually..."
+            echo "❌ Build missing - copying..."
             mkdir -p storage/app/static/build
             cp -r public/build/* storage/app/static/build/
           fi
-
-      # 14. Create .nojekyll file (important for GitHub Pages!)
-      - name: 📝 Create .nojekyll file
-        run: |
-          touch storage/app/static/.nojekyll
-          echo "✅ .nojekyll file created"
-
-      # 15. Create 404.html (GitHub Pages routing)
-      - name: 📝 Setup 404 page
-        run: |
-          if [ ! -f "storage/app/static/404.html" ]; then
-            echo "Creating 404.html..."
-            cp storage/app/static/index.html storage/app/static/404.html 2>/dev/null || echo "404.html will be created from template"
+          
+          echo ""
+          echo "=== Checking HTML ==="
+          if [ -f "storage/app/static/index.html" ]; then
+            echo "✅ index.html exists"
+            echo "CSS/JS references:"
+            grep -o 'href="[^"]*\.css"' storage/app/static/index.html | head -2
+            grep -o 'src="[^"]*\.js"' storage/app/static/index.html | head -2
           fi
 
-      # 16. List generated files
-      - name: 📂 List static files
+      - name: 🔧 Fix Paths
         run: |
-          echo "Generated files:"
-          ls -la storage/app/static/
-          echo ""
-          echo "Total size:"
-          du -sh storage/app/static/
-          echo ""
-          echo "HTML files:"
-          find storage/app/static -name "*.html" | wc -l
+          cd storage/app/static
+          
+          # Fix all absolute paths to include /z4plays/
+          find . -name "*.html" -type f -exec sed -i \
+            -e 's|href="/build/|href="/z4plays/build/|g' \
+            -e 's|src="/build/|src="/z4plays/build/|g' \
+            -e 's|href="/assets/|href="/z4plays/assets/|g' \
+            -e 's|src="/assets/|src="/z4plays/assets/|g' \
+            -e 's|href="/images/|href="/z4plays/images/|g' \
+            -e 's|src="/images/|src="/z4plays/images/|g' \
+            {} \;
+          
+          echo "✅ Paths fixed"
+          echo "Verify:"
+          grep -o 'href="[^"]*build[^"]*"' index.html | head -2
 
-      # 17. Upload artifact for GitHub Pages
-      - name: 📤 Upload artifact
+      - name: 📤 Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'storage/app/static'
 
-  # Deployment job
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     
-    # Add permissions for this job too
     permissions:
       pages: write
       id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: ✅ Deployment Summary
-        run: |
-          echo "🎉 Deployment completed successfully!"
-          echo "🌐 Your site is live!"
