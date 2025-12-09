@@ -1,13 +1,11 @@
 {
     "version": 2,
     "name": "appvault",
-    "buildCommand": "npm run vercel:build",
+    "buildCommand": "npm run build && npm run generate",
     "outputDirectory": "storage/app/static",
+    "installCommand": "npm ci",
     "framework": null,
-    "regions": ["iad1"],
-    "github": {
-      "silent": true
-    },
+    "ignoreCommand": "git diff --quiet HEAD^ HEAD",
     "rewrites": [
       {
         "source": "/(.*)",
