@@ -106,7 +106,7 @@ jobs:
       - name: 🎨 Generate static site
         run: |
           php artisan cache:clear
-          php please ssg:generate --workers=4
+          php please ssg:generate
         env:
           APP_ENV: production
 
