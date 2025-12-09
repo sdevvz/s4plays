@@ -1,0 +1,109 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main, production]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
+
+      # 3. Composer Cache
+      - name: 📦 Composer Cache
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: 🔄 Cache Composer
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      # 4. Install Composer
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      # 5. Setup Node
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 6. Install NPM
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      # 7. Build Assets
+      - name: 🏗️ Build Assets
+        run: npm run build
+
+      # 8. Create .env
+      - name: ⚙️ Create .env
+        run: |
+          echo "APP_NAME=AppVault" > .env
+          echo "APP_ENV=production" >> .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "APP_DEBUG=false" >> .env
+          echo "APP_URL=https://s4plays.vercel.app" >> .env
+          echo "STATAMIC_LICENSE_KEY=${{ secrets.STATAMIC_LICENSE_KEY }}" >> .env
+
+      # 9. Generate Key
+      - name: 🔑 Generate Key
+        run: php artisan key:generate || echo "Key exists"
+
+      # 10. Clear Caches
+      - name: 🧹 Clear Caches
+        run: |
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+
+      # 11. Optimize
+      - name: ⚡ Optimize
+        run: |
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+      # 12. Generate Static Site
+      - name: 🎨 Generate Static Site
+        run: php please ssg:generate --workers=4
+
+      # 13. Verify
+      - name: ✅ Verify Build
+        run: |
+          echo "Checking output..."
+          ls -la storage/app/static/ | head -10
+          
+          if [ -d "storage/app/static/build" ]; then
+            echo "✅ Build directory exists"
+          else
+            echo "❌ Build missing - copying..."
+            mkdir -p storage/app/static/build
+            cp -r public/build/* storage/app/static/build/
+          fi
+
+      # 14. Deploy to Vercel
+      - name: 🚀 Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./storage/app/static
+          vercel-args: '--prod'
