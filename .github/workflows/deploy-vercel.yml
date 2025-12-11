@@ -45,7 +45,6 @@ jobs:
           php artisan config:clear
           php please stache:warm
           php please stache:refresh
-          php please static:warm
           php please static:clear
 
       - name: Generate static site
