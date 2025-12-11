@@ -62,7 +62,8 @@ return [
 
     'urls' => [
         //
-        '/apps'
+        '/apps',
+        '/px'
     ],
 
     /*
