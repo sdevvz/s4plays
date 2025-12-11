@@ -44,7 +44,9 @@ jobs:
           php artisan view:clear
           php artisan config:clear
           php please stache:warm
+          php please stache:refresh
           php please static:warm
+          php please static:clear
 
       - name: Generate static site
         run: php please ssg:generate
