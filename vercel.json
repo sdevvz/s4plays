@@ -1,6 +1,20 @@
 {
-  "buildCommand": "php please ssg:generate",
-  "outputDirectory": "storage/app/static",
-  "framework": null,
-  "installCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build"
+  "routes": [
+    {
+      "src": "/apps",
+      "dest": "/apps/index.html"
+    },
+    {
+      "src": "/px",
+      "dest": "/px/index.html"
+    },
+    {
+      "src": "/apps/(.*)",
+      "dest": "/apps/$1"
+    },
+    {
+      "src": "/px/(.*)",
+      "dest": "/px/$1"
+    }
+  ]
 }
