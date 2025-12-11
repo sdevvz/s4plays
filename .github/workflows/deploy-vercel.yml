@@ -1,18 +1,17 @@
-name: Deploy Statamic SSG to Vercel
+name: Deploy to Vercel
 
 on:
   push:
-    branches: [ main ]
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,40 +20,40 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, dom, fileinfo, gd
-
-      - name: Install Composer Dependencies
-        run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, zip
+          coverage: none
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Install NPM Dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction
+
+      - name: Install NPM dependencies
         run: npm ci
 
-      - name: Build Assets (Vite)
+      - name: Build frontend assets
         run: npm run build
-        # لا نحتاج لـ ASSET_URL مع Vercel
 
-      - name: Generate Static Site
+      - name: Generate static site
         run: php please ssg:generate
-        env:
-          APP_KEY: ${{ secrets.APP_KEY }}
-          # هنا لا يهم الرابط كثيراً لأن المسارات ستكون من الجذر، لكن يفضل وضعه
-          APP_URL: https://s4plays.vercel.app 
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts (Vercel)
-        # هذه الخطوة تخبر Vercel أننا نريد رفع المجلد storage/app/static
-
-      - name: Deploy to Vercel
-        # الأمر prebuilt يرفع الملفات الجاهزة فقط ولا يحاول تشغيل أوامر بناء داخل فيرسل
+      - name: Deploy to Vercel (Production)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: storage/app/static # قد تحتاج لتعديل إعدادات vercel.json بدلاً من هذا السطر، انظر للملاحظة بالأسفل
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel (Preview)
+        if: github.event_name == 'pull_request'
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
