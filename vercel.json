@@ -1,20 +1,24 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/apps",
+      "destination": "/apps/index.html"
+    },
+    {
+      "source": "/px",
+      "destination": "/px/index.html"
+    }
+  ],
   "routes": [
     {
-      "src": "/apps",
-      "dest": "/apps/index.html"
+      "handle": "filesystem"
     },
     {
-      "src": "/px",
-      "dest": "/px/index.html"
-    },
-    {
-      "src": "/apps/(.*)",
-      "dest": "/apps/$1"
-    },
-    {
-      "src": "/px/(.*)",
-      "dest": "/px/$1"
+      "src": "/(.*)",
+      "dest": "/$1",
+      "status": 404
     }
   ]
 }
