@@ -38,6 +38,14 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      - name: Clear caches and warm up
+        run: |
+          php artisan cache:clear
+          php artisan view:clear
+          php artisan config:clear
+          php please stache:warm
+          php please static:warm
+
       - name: Generate static site
         run: php please ssg:generate
 
