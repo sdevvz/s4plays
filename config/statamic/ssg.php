@@ -44,6 +44,8 @@ return [
         public_path('js') => 'js',
         public_path('assets') => 'assets',
         public_path('img') => 'img',
+        public_path('px') => 'px',
+        public_path('apps') => 'apps',
     ],
 
     'symlinks' => [
