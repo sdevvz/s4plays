@@ -41,6 +41,12 @@ jobs:
       - name: Generate static site
         run: php please ssg:generate
 
+      - name: Prepare Vercel output
+        run: |
+          mkdir -p .vercel/output/static
+          cp -r storage/app/static/* .vercel/output/static/
+          echo '{"version": 3}' > .vercel/output/config.json
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
