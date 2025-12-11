@@ -53,7 +53,6 @@ jobs:
 
       - name: Build Project Artifacts (Vercel)
         # هذه الخطوة تخبر Vercel أننا نريد رفع المجلد storage/app/static
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Vercel
         # الأمر prebuilt يرفع الملفات الجاهزة فقط ولا يحاول تشغيل أوامر بناء داخل فيرسل
